@@ -38,23 +38,35 @@ class _ventanaHoyState extends State<ventanaHoy> {
               return Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
+              return Center(child: Text("Error al cargar las próximas citas"));
             }
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return Center(
-                child: ListView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.3),
                     Icon(
-                      Icons.sentiment_satisfied_alt,
+                      Icons.sentiment_satisfied_alt_outlined,
                       size: 100,
-                      color: Colors.grey[400],
+                      color: Colors.grey.shade400,
                     ),
                     SizedBox(height: 16),
                     Text(
-                      "¡Estás libre!\nNo tienes citas próximas.",
+                      "¡Estás libre!",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      "No tienes citas próximas agendadas.",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20, color: Colors.grey),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade500,
+                      ),
                     ),
                   ],
                 ),
@@ -67,18 +79,44 @@ class _ventanaHoyState extends State<ventanaHoy> {
               itemBuilder: (context, index) {
                 final cita = citas[index];
                 return Card(
-                  elevation: 4,
-                  margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  elevation: 3,
+                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: ListTile(
-                    leading: Icon(Icons.today, color: Colors.cyan, size: 40),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    leading: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.today_outlined,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 36,
+                        ),
+                      ],
+                    ),
                     title: Text(
                       cita.lugar,
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
-                    subtitle: Text("Con: ${cita.nombrePersona}"),
+                    subtitle: Text(
+                      "Con: ${cita.nombrePersona}",
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
                     trailing: Text(
                       "${cita.fecha}\n${cita.hora}",
                       textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 );

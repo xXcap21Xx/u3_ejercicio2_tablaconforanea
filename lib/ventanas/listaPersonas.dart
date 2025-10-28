@@ -45,24 +45,67 @@ class _ListaPersonasState extends State<ListaPersonas> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
+          if (snapshot.hasError) {
+            return Center(child: Text("Error al cargar los datos"));
+          }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
-              child: Text(
-                "No tienes personas registradas.\n¡Agrega uno!",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20, color: Colors.grey),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.people_outline,
+                    size: 100,
+                    color: Colors.grey.shade400,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    "Aún no hay nadie aquí",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Presiona el botón '+' para añadir tu primer amigo.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.grey.shade500),
+                  ),
+                ],
               ),
             );
           }
+
+
+
           final personas = snapshot.data!;
           return ListView.builder(
+            padding: EdgeInsets.only(top: 8,bottom: 80),
             itemCount: personas.length,
             itemBuilder: (context, index) {
               final persona = personas[index];
               return Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.grey.shade300,width: 1),
+                ),
+                elevation: 3,
+                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ListTile(
-                  title: Text(persona.nombre),
-                  subtitle: Text(persona.telefono),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  leading: CircleAvatar(
+                    backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    child: Text(persona.nombre.isNotEmpty ? persona.nombre[0] : '?',
+                    style: TextStyle(fontSize: 18,fontWeight:FontWeight.bold),
+                    ),
+                  ),
+                  title: Text(persona.nombre, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  subtitle: Text(persona.telefono, style: TextStyle(color: Colors.grey.shade600),
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

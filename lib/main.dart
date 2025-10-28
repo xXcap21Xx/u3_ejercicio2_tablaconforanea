@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:u3_ejercicio2_tablaconforanea/principal.dart';
 
 void main() {
-  runApp(MaterialApp(home: App02u3(),debugShowCheckedModeBanner: false,));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -12,26 +12,28 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Control de Citas',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.cyan,
+          brightness: Brightness.light,
+          primary: Colors.cyan[700]!,
+          secondary: Colors.amber[800]!,
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.cyan[800],
+          foregroundColor: Colors.white,
+          elevation: 4,
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: Colors.amber[800],
+          foregroundColor: Colors.white,
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: App02u3(),
     );
   }
 }

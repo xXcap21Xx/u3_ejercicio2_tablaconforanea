@@ -36,7 +36,6 @@ class _FormularioPersonaState extends State<FormularioPersona> {
     super.dispose();
   }
 
-  @override
   void _guardarPersona() async {
     if (_formKey.currentState!.validate()) {
       if (_esEditar) {

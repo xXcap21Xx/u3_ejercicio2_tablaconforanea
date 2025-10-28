@@ -13,7 +13,7 @@ class App02u3 extends StatefulWidget {
 class _App02u3State extends State<App02u3> {
   int _index = 0;
 
-  final List<Widget> _vetanas = [ListaPersonas(), ventanaCita(), ventanaHoy()];
+  final List<Widget> _ventanas = [ListaPersonas(), ventanaCita(), ventanaHoy()];
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class _App02u3State extends State<App02u3> {
         backgroundColor: Colors.cyan,
         centerTitle: true,
       ),
-      body: _vetanas[_index],
+      body: _ventanas[_index],
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,

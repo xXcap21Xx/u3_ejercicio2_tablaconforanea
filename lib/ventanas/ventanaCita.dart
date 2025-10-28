@@ -44,11 +44,38 @@ class _ventanaCitaState extends State<ventanaCita> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
+          if (snapshot.hasError) {
+            return Center(child: Text("Error al cargar las citas"));
+          }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
-              child: Text(
-                "No hay citas registradas.",
-                style: TextStyle(fontSize: 20, color: Colors.grey),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.event_busy_outlined,
+                    size: 100,
+                    color: Colors.grey.shade400,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    "No hay citas agendadas",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Presiona el botón '+' para crear una nueva cita.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
               ),
             );
           }
@@ -59,49 +86,57 @@ class _ventanaCitaState extends State<ventanaCita> {
             itemBuilder: (context, index) {
               final cita = citas[index];
               return Card(
-                elevation: 4,
-                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                elevation: 3,
+                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ListTile(
-                  leading: Icon(Icons.event_note, color: Colors.cyan, size: 40),
-                  title: Text(
-                    cita.lugar,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    "Con: ${cita.nombrePersona}\n${cita.anotaciones}",
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
+                  contentPadding: EdgeInsets.fromLTRB(20, 12, 12, 12),
+                  leading: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "${cita.fecha}\n${cita.hora}",
-                        textAlign: TextAlign.right,
-                      ),
-                      PopupMenuButton<String>(
-                        onSelected: (value) {
-                          if (value == 'edit') {
-                            _navegarAFormulario(cita);
-                          } else if (value == 'delete') {
-                            _eliminarCita(cita.idCita);
-                          }
-                        },
-                        itemBuilder: (BuildContext context) =>
-                            <PopupMenuEntry<String>>[
-                              const PopupMenuItem<String>(
-                                value: 'delete',
-                                child: ListTile(
-                                  leading: Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
-                                  title: Text('Eliminar'),
-                                ),
-                              ),
-                            ],
+                      Icon(
+                        Icons.event_note_outlined,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 36,
                       ),
                     ],
                   ),
+                  title: Text(
+                    cita.lugar,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  subtitle: Text(
+                    "Con: ${cita.nombrePersona}\n${cita.fecha} - ${cita.hora}",
+                    style: TextStyle(color: Colors.grey.shade600, height: 1.4),
+                  ),
                   isThreeLine: true,
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        _navegarAFormulario(cita);
+                      } else if (value == 'delete') {
+                        _eliminarCita(cita.idCita);
+                      }
+                    },
+                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'edit',
+                        child: ListTile(
+                          leading: Icon(Icons.edit_outlined, color: Colors.blue),
+                          title: Text('Editar'),
+                        ),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'delete',
+                        child: ListTile(
+                          leading: Icon(Icons.delete_outline, color: Colors.red),
+                          title: Text('Eliminar'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -109,7 +144,7 @@ class _ventanaCitaState extends State<ventanaCita> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed:() => _navegarAFormulario(),
+        onPressed: () => _navegarAFormulario(),
         child: Icon(Icons.add),
         backgroundColor: Colors.cyan,
       ),

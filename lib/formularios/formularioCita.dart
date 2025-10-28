@@ -25,7 +25,7 @@ class _FormularioCitaState extends State<FormularioCita> {
   late TextEditingController _horaController;
 
   bool _esEditar = false;
-  List<Persona> _personas = [];
+  Future<List<Persona>>? _personasFuture;
   Persona? _personaSeleccionada;
   bool _depCargada = false;
 
@@ -48,8 +48,9 @@ class _FormularioCitaState extends State<FormularioCita> {
     } else {
       _fechaController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     }
-    _cargarPersonas();
+    _personasFuture = _cargarPersonas();
   }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -61,24 +62,19 @@ class _FormularioCitaState extends State<FormularioCita> {
     }
   }
 
-
-  void _cargarPersonas() async {
+  Future<List<Persona>> _cargarPersonas() async {
     final personas = await DB.mostrarPersona();
-    Persona? personaInicial;
-
     if (_esEditar) {
-      final idPersonaDeCita = widget.citaEditar!.idCita;
+      final idPersonaDeCita = widget.citaEditar!.idPersona;
       try {
-        personaInicial = personas.firstWhere((p) => p.idPersona == idPersonaDeCita);
+        _personaSeleccionada = personas.firstWhere(
+          (p) => p.idPersona == idPersonaDeCita,
+        );
       } catch (e) {
-        personaInicial = null;
+        _personaSeleccionada = null;
       }
     }
-
-    setState(() {
-      _personas = personas;
-      _personaSeleccionada = personaInicial;
-    });
+    return personas;
   }
 
   Future<void> _seleccionarFecha() async {
@@ -108,31 +104,39 @@ class _FormularioCitaState extends State<FormularioCita> {
   }
 
   void _guardarCita() async {
-    if (_formKey.currentState!.validate()) {
-      if (_personaSeleccionada == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Por favor, selecciona una persona')),
-        );
-        return;
-      }
-
-      final nuevaCita = Cita(
-        idCita: _esEditar ? widget.cita!.idCita : null,
-        lugar: _lugarController.text,
-        fecha: _fechaController.text,
-        hora: _horaController.text,
-        anotaciones: _anotacionesController.text,
-        idPersona: _personaSeleccionada!.idPersona!,
-      );
-
-      if (_esEditar) {
-        await DB.actualizarCita(nuevaCita);
-      } else {
-        await DB.insertarCita(nuevaCita);
-      }
-
-      Navigator.pop(context, true);
+    if (!_formKey.currentState!.validate()) {
+      return;
     }
+
+    if (_personaSeleccionada == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: Debes seleccionar una persona.')),
+      );
+      return;
+    }
+
+    final int? personaId = _personaSeleccionada!.idPersona;
+
+    if (personaId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: La persona seleccionada no es válida.')),
+      );
+      return;
+    }
+    final citaModel = Cita(
+      idCita: _esEditar ? widget.citaEditar!.idCita : null,
+      lugar: _lugarController.text,
+      fecha: _fechaController.text,
+      hora: _horaController.text,
+      anotaciones: _anotacionesController.text,
+      idPersona: personaId,
+    );
+    if (_esEditar) {
+      await DB.actualizarCita(citaModel);
+    } else {
+      await DB.insertarCita(citaModel);
+    }
+    Navigator.pop(context, true);
   }
 
   @override
@@ -150,24 +154,42 @@ class _FormularioCitaState extends State<FormularioCita> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                DropdownButtonFormField<Persona>(
-                  initialValue: _personaSeleccionada,
-                  hint: Text('Seleccionar persona'),
-                  items: _personas.map((Persona persona) {
-                    return DropdownMenuItem<Persona>(
-                      value: persona,
-                      child: Text(persona.nombre),
+                FutureBuilder<List<Persona>>(
+                  future: _personasFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    }
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Text(
+                        "No hay personas registradas. Añade una primero.",
+                      );
+                    }
+
+                    final personas = snapshot.data!;
+                    return DropdownButtonFormField<Persona>(
+                      initialValue: _personaSeleccionada,
+                      hint: Text('Seleccionar persona'),
+                      items: personas.map((Persona persona) {
+                        return DropdownMenuItem<Persona>(
+                          value: persona,
+                          child: Text(persona.nombre),
+                        );
+                      }).toList(),
+                      onChanged: (Persona? newValue) {
+                        setState(() {
+                          _personaSeleccionada = newValue;
+                        });
+                      },
+                      validator: (value) => value == null
+                          ? 'Debes seleccionar una persona'
+                          : null,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person_search),
+                      ),
                     );
-                  }).toList(),
-                  onChanged: (Persona? newValue) {
-                    setState(() {
-                      _personaSeleccionada = newValue;
-                    });
                   },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person_search),
-                  ),
                 ),
                 SizedBox(height: 16),
                 TextFormField(

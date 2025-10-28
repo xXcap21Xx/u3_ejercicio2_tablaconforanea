@@ -46,6 +46,9 @@ class DB {
   static Future<List<Persona>> mostrarPersona() async {
     Database base = await _conectarDB();
     List<Map<String, dynamic>> temp = await base.query("persona");
+
+    return List.generate(temp.length, (i) => Persona.fromJSON(temp[i]));
+    /*
     return List.generate(temp.length, (contador) {
       return Persona(
         idPersona: temp[contador]['idPersona'],
@@ -53,6 +56,7 @@ class DB {
         telefono: temp[contador]['telefono'],
       );
     });
+     */
   }
 
   static Future<List<Cita>> mostrarCita() async {
@@ -99,46 +103,24 @@ class DB {
       INNER JOIN persona p ON c.idPersona = p.idPersona
       ORDER BY c.fecha DESC, c.hora DESC
     ''');
-    return resultado
-        .map(
-          (map) => consultaModelo(
-            idCita: map['idCita'],
-            lugar: map['lugar'],
-            fecha: map['fecha'],
-            hora: map['hora'],
-            anotaciones: map['anotaciones'],
-            nombrePersona: map['nombrePersona'],
-          ),
-        )
-        .toList();
+    return resultado.map((map)=> consultaModelo.fromJSON(map)).toList();
   }
 
   static Future<List<consultaModelo>> getCitaHoy() async {
     Database base = await _conectarDB();
-
     String hoy = DateTime.now().toIso8601String().split('T').first;
 
     final List<Map<String, dynamic>> resultado = await base.rawQuery(
       '''
-      SELECT c.idCita, c.lugar, c.fecha, c.hora, c.anotaciones, p.nombre as nombrePersona
+      SELECT c.*, p.nombre as nombrePersona
       FROM cita c
       INNER JOIN persona p ON c.idPersona = p.idPersona
       WHERE c.fecha >= ?
       ORDER BY c.fecha ASC, c.hora ASC
-    ''',
-      [hoy],
+      ''', [hoy],
     );
 
-    return resultado.map((map) {
-      return consultaModelo(
-        idCita: map['idCita'],
-        lugar: map['lugar'],
-        fecha: map['fecha'],
-        hora: map['hora'],
-        anotaciones: map['anotaciones'],
-        nombrePersona: map['nombrePersona'],
-      );
-    }).toList();
+    return resultado.map((map)=>consultaModelo.fromJSON(map)).toList();
   }
   static Future<Persona?> getPersonaById(int id) async {
     Database base = await _conectarDB();

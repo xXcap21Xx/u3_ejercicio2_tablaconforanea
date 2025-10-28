@@ -1,19 +1,12 @@
 class Persona {
-  int? idPersona;
-  String nombre;
-  String telefono;
+  final int? idPersona;
+  final String nombre;
+  final String telefono;
 
-  Persona({
-    this.idPersona,
-    required this.nombre,
-    required this.telefono,
-  });
+  Persona({this.idPersona, required this.nombre, required this.telefono});
 
   Map<String, dynamic> toJSON() {
-    final Map<String, dynamic> data = {
-      'nombre': nombre,
-      'telefono': telefono,
-    };
+    final Map<String, dynamic> data = {'nombre': nombre, 'telefono': telefono};
     if (idPersona != null) {
       data['idPersona'] = idPersona;
     }
@@ -27,4 +20,14 @@ class Persona {
       telefono: json['telefono'].toString(),
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Persona &&
+          runtimeType == other.runtimeType &&
+          idPersona == other.idPersona;
+
+  @override
+  int get hashCode => idPersona.hashCode;
 }
